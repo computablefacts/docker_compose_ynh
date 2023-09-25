@@ -68,19 +68,6 @@ ynh_systemd_action --service_name=$app --action="stop" --log_path="/var/log/$app
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
-if [ "$upgrade_type" == "UPGRADE_APP" ]
-then
-	ynh_script_progression --message="Upgrading source files..." --weight=1
-
-	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$install_dir"
-fi
-
-# $install_dir will automatically be initialized with some decent 
-# permission by default ... however, you may need to recursively reapply
-# ownership to all files such as after the ynh_setup_source step
-chown -R $app:www-data "$install_dir"
-
 #=================================================
 # REAPPLY SYSTEM CONFIGURATIONS
 #=================================================
@@ -88,37 +75,22 @@ ynh_script_progression --message="Upgrading system configurations related to $ap
 
 # This should be a literal copypasta of what happened in the install's "System configuration" section
 
-ynh_add_fpm_config
-
 ynh_add_nginx_config
 
 ynh_add_systemd_config
 
-yunohost service add $app --description="A short description of the app" --log="/var/log/$app/$app.log"
+yunohost service add $app --description="$app" --log="/var/log/$app/$app.log" --test_status "docker compose ls | grep /$app/"
 
 ynh_use_logrotate --non-append
-
-ynh_add_fail2ban_config --logpath="/var/log/nginx/${domain}-error.log" --failregex="Regex to match into the log for a failed login"
 
 #=================================================
 # RECONFIGURE THE APP (UPDATE CONF, APPLY MIGRATIONS...)
 #=================================================
 # UPDATE A CONFIG FILE
 #=================================================
-ynh_script_progression --message="Updating a configuration file..." --weight=1
+ynh_script_progression --message="Adding the Docker Compose file..." --weight=1
 
-### Same as during install
-###
-### The file will automatically be backed-up if it's found to be manually modified (because
-### ynh_add_config keeps track of the file's checksum)
-
-ynh_add_config --template="some_config_file" --destination="$install_dir/some_config_file"
-
-# FIXME: this should be handled by the core in the future
-# You may need to use chmod 600 instead of 400,
-# for example if the app is expected to be able to modify its own config
-chmod 400 "$install_dir/some_config_file"
-chown $app:$app "$install_dir/some_config_file"
+ynh_add_config --template="docker-compose.yaml" --destination="$data_dir/docker-compose.yaml"
 
 ### For more complex cases where you want to replace stuff using regexes,
 ### you shoud rely on ynh_replace_string (which is basically a wrapper for sed)
@@ -137,5 +109,4 @@ ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$ap
 #=================================================
 # END OF SCRIPT
 #=================================================
-
 ynh_script_progression --message="Upgrade of $app completed" --last
