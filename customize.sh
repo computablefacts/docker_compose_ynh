@@ -15,8 +15,6 @@ function change_app_id {
   local app_id=$1
   log "Change app ID to [${app_id}]"
 
-  pwd
-  
   sed -ri 's/^(id = "docker_compose"$)/id = \"'"${app_id}"'\"/' ./manifest.toml
 }
 
