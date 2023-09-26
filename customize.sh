@@ -4,6 +4,7 @@ function show_help {
   pwd
   printf "Used to customize the YunoHost app installation.\n \
           \t-a|--app-id: change app id in manifest.toml\n\
+          \t-n|--name: change app name in manifest.toml\n\
           \t--desc-en: change English description in manifest.toml\n\
           \t--desc-fr: change French description in manifest.toml\n\
           \t-h|--help: this help menu\n"
@@ -18,6 +19,13 @@ function change_app_id {
   log "Change app ID to [${app_id}]"
 
   sed -ri 's/^(id = "docker_compose"$)/id = \"'"${app_id}"'\"/' ./manifest.toml
+}
+
+function change_name {
+  local name=$1
+  log "Change name to [${name}]"
+
+  sed -ri 's/^name\s*=\s*".*"\s*$/name = \"'"${name}"'\"/' ./manifest.toml
 }
 
 function change_desc_en {
@@ -52,6 +60,10 @@ do
       -a|--app-id)
       shift
       change_app_id $1
+      ;;
+      -n|--name)
+      shift
+      change_name "$1"
       ;;
       --desc-en)
       shift
