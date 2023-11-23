@@ -33,6 +33,7 @@ ynh_use_logrotate
 ynh_script_progression --message="Adding the Docker Compose file..." --weight=1
 
 ynh_add_config --template="docker-compose.yaml" --destination="$data_dir/docker-compose.yaml"
+ynh_add_config --template=".env" --destination="$data_dir/.env"
 
 
 ynh_script_progression --message="Allow Docker containers to access MariaDB database..." --weight=1
