@@ -91,6 +91,7 @@ ynh_use_logrotate --non-append
 ynh_script_progression --message="Adding the Docker Compose file..." --weight=1
 
 ynh_add_config --template="docker-compose.yaml" --destination="$data_dir/docker-compose.yaml"
+ynh_add_config --template=".env" --destination="$data_dir/.env"
 
 ### For more complex cases where you want to replace stuff using regexes,
 ### you shoud rely on ynh_replace_string (which is basically a wrapper for sed)
